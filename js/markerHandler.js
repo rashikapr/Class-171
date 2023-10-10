@@ -123,16 +123,36 @@ AFRAME.registerComponent("markerhandler", {
     // Reading current table order details
     
 
+         firebase
+      .firestore()
+      .collection("tables")
+      .doc(tNumber)
+      .get()
+      .then(doc => {
+        var details = doc.data();
+
+        if (details["current_orders"][dish.id]) {
+          // Increasing Current Quantity
+          details["current_orders"][dish.id]["quantity"] += 1;
+
+          //Calculating Subtotal of item
+          var currentQuantity = details["current_orders"][dish.id]["quantity"];
+
+          details["current_orders"][dish.id]["subtotal"] =
+            currentQuantity * dish.price;
+        } else {
+          details["current_orders"][dish.id] = {
+            item: dish.dish_name,
+            price: dish.price,
+            quantity: 1,
+            subtotal: dish.price * 1
+          };
+        }
+
         details.total_bill += dish.price;
 
         //Updating db
-        firebase
-          .firestore()
-          .collection("tables")
-          .doc(doc.id)
-          .update(details);
-      });
-    
+       
     
   },
   //Function to get the dishes collection from db
